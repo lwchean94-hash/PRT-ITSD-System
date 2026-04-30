@@ -7,7 +7,7 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         .container { background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        .dashboard-container { max-width: 800px; text-align: left; }
+        .dashboard-container { max-width: 1000px; text-align: left; }
         h2, h3 { margin-top: 0; color: #333; }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; font-weight: bold; }
@@ -15,23 +15,27 @@
         button { width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
         button:hover { background-color: #004494; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
-        .btn-danger { background-color: #dc3545; width: auto; padding: 8px 16px; }
+        .btn-danger { background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 12px;}
         .btn-danger:hover { background-color: #c82333; }
-        .btn-success { background-color: #28a745; }
+        .btn-success { background-color: #28a745; width: auto; padding: 6px 12px; font-size: 12px;}
         .btn-success:hover { background-color: #218838; }
+        .btn-primary { background-color: #007bff; width: auto; padding: 6px 12px; font-size: 12px;}
+        .btn-primary:hover { background-color: #0069d9; }
+        
         .error-message { color: #d9534f; margin-top: 15px; font-size: 14px; display: none; }
         .toggle-link { margin-top: 20px; font-size: 14px; color: #0056b3; cursor: pointer; display: inline-block; font-weight: bold; }
         .toggle-link:hover { text-decoration: underline; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; vertical-align: top;}
         th { background-color: #f8f9fa; }
-        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block;}
         .status-pending { background: #fff3cd; color: #856404; }
         .status-approved { background: #cce5ff; color: #004085; }
+        .status-progress { background: #d1ecf1; color: #0c5460; }
         .status-closed { background: #d4edda; color: #155724; }
+        .meta-text { font-size: 11px; color: #666; display: block; margin-top: 4px; }
 
-        /* Hide specific sections by default */
         #registerArea, #dashboardArea { display: none; }
     </style>
 </head>
@@ -43,7 +47,7 @@
         <form id="loginForm">
             <div class="input-group"><label>User ID</label><input type="text" id="loginUserID" required></div>
             <div class="input-group"><label>Password</label><input type="password" id="loginPassword" required></div>
-            <button type="submit" id="loginBtn">Log In</button>
+            <button type="submit" id="loginBtn" style="width:100%; padding:12px; font-size:16px;">Log In</button>
             <div id="loginError" class="error-message"></div>
         </form>
         <span class="toggle-link" id="showRegisterLink">Don't have an account? Register here.</span>
@@ -57,7 +61,7 @@
             <div class="input-group"><label>Full Name</label><input type="text" id="regName" required></div>
             <div class="input-group"><label>Email</label><input type="email" id="regEmail" required></div>
             <div class="input-group"><label>Password</label><input type="password" id="regPassword" required></div>
-            <button type="submit" id="registerBtn">Register</button>
+            <button type="submit" id="registerBtn" style="width:100%; padding:12px; font-size:16px;">Register</button>
             <div id="registerError" class="error-message"></div>
         </form>
         <span class="toggle-link" id="showLoginLink">Already have an account? Log in.</span>
@@ -86,47 +90,47 @@
                 </div>
                 <div class="input-group">
                     <label>Description</label>
-                    <textarea id="reqDesc" required rows="3" placeholder="Briefly describe the requirements..."></textarea>
+                    <textarea id="reqDesc" required rows="2" placeholder="Briefly describe the requirements..."></textarea>
                 </div>
-                <button type="submit" id="submitReqBtn" class="btn-success">Submit Request</button>
+                <button type="submit" id="submitReqBtn" class="btn-success" style="font-size: 14px;">Submit Request</button>
                 <div id="reqMessage" style="margin-top: 10px; font-size: 14px; font-weight: bold; display: none;"></div>
             </form>
         </div>
 
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>My Requests</h3>
-                <button id="refreshDataBtn" style="width: auto; padding: 6px 12px; font-size: 12px; background-color: #6c757d;">Refresh Data</button>
+                <h3 id="tableTitle">My Requests</h3>
+                <button id="refreshDataBtn" class="btn-primary" style="background-color: #6c757d;">Refresh Data</button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th width="15%">Ticket ID</th>
-                        <th width="25%">Type</th>
-                        <th width="45%">Description</th>
-                        <th width="15%">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="ticketTableBody">
-                    <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
-                </tbody>
-            </table>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr id="tableHeaderRow">
+                            <th width="10%">ID</th>
+                            <th width="15%">Type</th>
+                            <th width="30%">Description</th>
+                            <th width="15%">Status</th>
+                            <th width="15%">Lifecycle Details</th>
+                            <!-- Admin column injected via JS if role === Admin -->
+                        </tr>
+                    </thead>
+                    <tbody id="ticketTableBody">
+                        <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec"; 
 
-        // --- Screen Switching Logic ---
         function toggleView(view) {
-            console.log("Switching view to: " + view);
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('registerArea').style.display = 'none';
             document.getElementById('dashboardArea').style.display = 'none';
-            
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('registerError').style.display = 'none';
-            
             document.getElementById(view + 'Area').style.display = 'block';
         }
 
@@ -135,129 +139,50 @@
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('refreshDataBtn').addEventListener('click', loadTickets);
 
-        // --- Login Logic ---
+        // --- Auth & Submission Logic (Unchanged) ---
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            const err = document.getElementById('loginError');
-            
-            btn.disabled = true; 
-            btn.innerText = "Authenticating..."; 
-            err.style.display = "none";
-            
-            const payload = { 
-                action: "login", 
-                userID: document.getElementById('loginUserID').value, 
-                password: document.getElementById('loginPassword').value 
-            };
-            
-            try {
-                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-                const result = await res.json();
-                
-                if (result.success) {
-                    setupDashboard(result.user);
-                } else { 
-                    err.innerText = result.message; 
-                    err.style.display = "block"; 
-                }
-            } catch (error) { 
-                err.innerText = "Network error connecting to API."; 
-                err.style.display = "block"; 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerText = "Log In"; 
-            }
+            e.preventDefault(); const btn = document.getElementById('loginBtn'); const err = document.getElementById('loginError');
+            btn.disabled = true; btn.innerText = "Authenticating..."; err.style.display = "none";
+            const payload = { action: "login", userID: document.getElementById('loginUserID').value, password: document.getElementById('loginPassword').value };
+            try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); const result = await res.json();
+                if (result.success) setupDashboard(result.user); else { err.innerText = result.message; err.style.display = "block"; }
+            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Log In"; }
         });
 
-        // --- Registration Logic ---
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('registerBtn');
-            const err = document.getElementById('registerError');
-            
-            btn.disabled = true; 
-            btn.innerText = "Registering..."; 
-            err.style.display = "none";
-            
-            const payload = { 
-                action: "register", 
-                userID: document.getElementById('regUserID').value, 
-                name: document.getElementById('regName').value, 
-                email: document.getElementById('regEmail').value, 
-                password: document.getElementById('regPassword').value 
-            };
-            
-            try {
-                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-                const result = await res.json();
-                
-                if (result.success) { 
-                    document.getElementById('registerForm').reset(); 
-                    setupDashboard(result.user); 
-                } else { 
-                    err.innerText = result.message; 
-                    err.style.display = "block"; 
-                }
-            } catch (error) { 
-                err.innerText = "Network error connecting to API."; 
-                err.style.display = "block"; 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerText = "Register"; 
-            }
+            e.preventDefault(); const btn = document.getElementById('registerBtn'); const err = document.getElementById('registerError');
+            btn.disabled = true; btn.innerText = "Registering..."; err.style.display = "none";
+            const payload = { action: "register", userID: document.getElementById('regUserID').value, name: document.getElementById('regName').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPassword').value };
+            try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); const result = await res.json();
+                if (result.success) { document.getElementById('registerForm').reset(); setupDashboard(result.user); } else { err.innerText = result.message; err.style.display = "block"; }
+            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Register"; }
         });
 
-        // --- Submit Request Logic ---
         document.getElementById('requestForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitReqBtn');
-            const msg = document.getElementById('reqMessage');
-            
-            btn.disabled = true; 
-            btn.innerText = "Submitting..."; 
-            msg.style.display = "none";
-            
+            e.preventDefault(); const btn = document.getElementById('submitReqBtn'); const msg = document.getElementById('reqMessage');
+            btn.disabled = true; btn.innerText = "Submitting..."; msg.style.display = "none";
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
-            const payload = { 
-                action: "new_request", 
-                submitterID: user.userID, 
-                type: document.getElementById('reqType').value, 
-                description: document.getElementById('reqDesc').value 
-            };
-            
-            try {
-                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-                const result = await res.json();
-                
-                if (result.success) {
-                    msg.innerText = "Success! Ticket created: " + result.ticketID; 
-                    msg.style.color = "#155724"; 
-                    msg.style.display = "block";
-                    document.getElementById('requestForm').reset();
-                    loadTickets();
-                } else { 
-                    msg.innerText = "Error submitting request."; 
-                    msg.style.color = "#d9534f"; 
-                    msg.style.display = "block"; 
-                }
-            } catch (error) { 
-                msg.innerText = "Network error."; 
-                msg.style.color = "#d9534f"; 
-                msg.style.display = "block"; 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerText = "Submit Request"; 
-            }
+            const payload = { action: "new_request", submitterID: user.userID, type: document.getElementById('reqType').value, description: document.getElementById('reqDesc').value };
+            try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); const result = await res.json();
+                if (result.success) { msg.innerText = "Ticket created!"; msg.style.color = "#155724"; msg.style.display = "block"; document.getElementById('requestForm').reset(); loadTickets(); } 
+                else { msg.innerText = "Error submitting request."; msg.style.color = "#d9534f"; msg.style.display = "block"; }
+            } catch (error) { msg.innerText = "Network error."; msg.style.color = "#d9534f"; msg.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Submit Request"; }
         });
 
-        // --- Load Tickets Data ---
+        // --- Load & Render Tickets ---
         async function loadTickets() {
             const tbody = document.getElementById('ticketTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Fetching data...</td></tr>';
+            const headerRow = document.getElementById('tableHeaderRow');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Fetching data...</td></tr>';
             
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
-            if (!user) return; // Prevent crash if somehow called while logged out
+            if (!user) return; 
+
+            // Adjust Table Header for Admin
+            document.getElementById('tableTitle').innerText = user.role === 'Admin' ? "All Requests (Admin View)" : "My Requests";
+            if (user.role === 'Admin' && headerRow.cells.length === 5) {
+                const th = document.createElement('th'); th.width = "15%"; th.innerText = "Admin Actions"; headerRow.appendChild(th);
+            }
 
             const payload = { action: "get_tickets", userID: user.userID, role: user.role };
 
@@ -267,30 +192,77 @@
                 
                 if (result.success) {
                     tbody.innerHTML = '';
-                    if (result.tickets.length === 0) { 
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No requests found.</td></tr>'; 
-                        return; 
-                    }
+                    if (result.tickets.length === 0) { tbody.innerHTML = `<tr><td colspan="${user.role === 'Admin' ? '6' : '5'}" style="text-align: center;">No requests found.</td></tr>`; return; }
                     
                     result.tickets.reverse().forEach(ticket => {
                         let badgeClass = "status-pending";
-                        if(ticket.status !== "Pending Approval") badgeClass = "status-approved";
+                        if(ticket.status === "Approved") badgeClass = "status-approved";
+                        if(ticket.status === "In Progress") badgeClass = "status-progress";
                         if(ticket.status === "Closed") badgeClass = "status-closed";
 
-                        tbody.innerHTML += `<tr>
+                        // Build the Lifecycle text
+                        let metaInfo = "";
+                        if (ticket.approverName) metaInfo += `<span class="meta-text">Approved by: ${ticket.approverName}</span>`;
+                        if (ticket.assignedTo) metaInfo += `<span class="meta-text">Assigned to: ${ticket.assignedTo} (${ticket.dateAssigned})</span>`;
+                        if (ticket.dateCompleted) metaInfo += `<span class="meta-text">Closed on: ${ticket.dateCompleted}</span>`;
+
+                        let rowHTML = `<tr>
                             <td><strong>${ticket.ticketID}</strong></td>
                             <td>${ticket.type}</td>
                             <td>${ticket.description}</td>
                             <td><span class="status-badge ${badgeClass}">${ticket.status}</span></td>
-                        </tr>`;
+                            <td>${metaInfo || '<span class="meta-text">No data yet</span>'}</td>
+                        `;
+
+                        // Add Admin Action Buttons
+                        if (user.role === 'Admin') {
+                            let actionBtn = "";
+                            if (ticket.status === "Pending Approval") {
+                                actionBtn = `<button class="btn-success" onclick="updateTicket('${ticket.ticketID}', 'approve')">Approve</button>`;
+                            } else if (ticket.status === "Approved") {
+                                actionBtn = `<button class="btn-primary" onclick="updateTicket('${ticket.ticketID}', 'assign')">Assign Worker</button>`;
+                            } else if (ticket.status === "In Progress") {
+                                actionBtn = `<button class="btn-danger" onclick="updateTicket('${ticket.ticketID}', 'close')">Close Ticket</button>`;
+                            } else {
+                                actionBtn = `<span class="meta-text">Resolved</span>`;
+                            }
+                            rowHTML += `<td>${actionBtn}</td>`;
+                        }
+
+                        rowHTML += `</tr>`;
+                        tbody.innerHTML += rowHTML;
                     });
                 }
-            } catch (error) { 
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading tickets.</td></tr>'; 
+            } catch (error) { tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Error loading tickets.</td></tr>`; }
+        }
+
+        // --- Ticket Action Logic ---
+        async function updateTicket(ticketID, actionType) {
+            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            const payload = { action: "update_ticket", ticketID: ticketID, updateType: actionType };
+
+            if (actionType === 'approve') {
+                payload.approverName = user.name; // Automatically use the Admin's name
+            } else if (actionType === 'assign') {
+                const workerName = prompt("Enter the name of the worker to assign this to:");
+                if (!workerName) return; // Cancel if empty
+                payload.assignedTo = workerName;
+            }
+
+            try {
+                // To keep UI responsive, we could add a loading state here, but we'll just await and refresh
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.success) {
+                    loadTickets(); // Refresh table to show new status
+                } else {
+                    alert("Failed to update ticket: " + result.message);
+                }
+            } catch (error) {
+                alert("Network error while updating ticket.");
             }
         }
 
-        // --- Dashboard & Session ---
         function setupDashboard(user) {
             toggleView('dashboard');
             document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
@@ -299,21 +271,8 @@
             loadTickets(); 
         }
 
-        function logout() {
-            sessionStorage.removeItem('itsd_user'); 
-            document.getElementById('loginForm').reset(); 
-            toggleView('login');
-        }
-
-        // --- Initialize Page ---
-        window.onload = function() {
-            const savedUser = sessionStorage.getItem('itsd_user');
-            if (savedUser) {
-                setupDashboard(JSON.parse(savedUser));
-            } else {
-                toggleView('login');
-            }
-        };
+        function logout() { sessionStorage.removeItem('itsd_user'); document.getElementById('loginForm').reset(); toggleView('login'); }
+        window.onload = function() { const savedUser = sessionStorage.getItem('itsd_user'); if (savedUser) setupDashboard(JSON.parse(savedUser)); else toggleView('login'); };
     </script>
 </body>
 </html>
