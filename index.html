@@ -5,21 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ITSD System</title>
     <style>
-        /* Clean and modern styling */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         .container { background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        h2 { margin-top: 0; color: #333; }
+        .dashboard-container { max-width: 800px; text-align: left; }
+        h2, h3 { margin-top: 0; color: #333; }
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .input-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; font-weight: bold; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: inherit; }
         button { width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
         button:hover { background-color: #004494; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-danger { background-color: #dc3545; width: auto; padding: 8px 16px; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
         .error-message { color: #d9534f; margin-top: 15px; font-size: 14px; display: none; }
         .toggle-link { margin-top: 20px; font-size: 14px; color: #0056b3; cursor: pointer; display: inline-block; }
         .toggle-link:hover { text-decoration: underline; }
         
-        /* Layout Management - Hide sections by default */
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #cce5ff; color: #004085; }
+        .status-closed { background: #d4edda; color: #155724; }
+
+        /* Layout Management */
         #registerArea, #dashboardArea { display: none; }
     </style>
 </head>
@@ -29,14 +42,8 @@
     <div class="container" id="loginArea">
         <h2>ITSD System Login</h2>
         <form id="loginForm">
-            <div class="input-group">
-                <label for="loginUserID">User ID</label>
-                <input type="text" id="loginUserID" required placeholder="Enter your User ID">
-            </div>
-            <div class="input-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required placeholder="Enter your password">
-            </div>
+            <div class="input-group"><label>User ID</label><input type="text" id="loginUserID" required></div>
+            <div class="input-group"><label>Password</label><input type="password" id="loginPassword" required></div>
             <button type="submit" id="loginBtn">Log In</button>
             <div id="loginError" class="error-message"></div>
         </form>
@@ -45,167 +52,183 @@
 
     <!-- REGISTER SCREEN -->
     <div class="container" id="registerArea">
-        <h2>Register New Account</h2>
+        <h2>Register Account</h2>
         <form id="registerForm">
-            <div class="input-group">
-                <label for="regUserID">Employee / User ID</label>
-                <input type="text" id="regUserID" required placeholder="Choose a User ID">
-            </div>
-            <div class="input-group">
-                <label for="regName">Full Name</label>
-                <input type="text" id="regName" required placeholder="Enter your name">
-            </div>
-            <div class="input-group">
-                <label for="regEmail">Email Address</label>
-                <input type="email" id="regEmail" required placeholder="Enter your email">
-            </div>
-            <div class="input-group">
-                <label for="regPassword">Password (For PoC Use Only)</label>
-                <input type="password" id="regPassword" required placeholder="Create a password">
-            </div>
+            <div class="input-group"><label>User ID</label><input type="text" id="regUserID" required></div>
+            <div class="input-group"><label>Full Name</label><input type="text" id="regName" required></div>
+            <div class="input-group"><label>Email</label><input type="email" id="regEmail" required></div>
+            <div class="input-group"><label>Password</label><input type="password" id="regPassword" required></div>
             <button type="submit" id="registerBtn">Register</button>
             <div id="registerError" class="error-message"></div>
         </form>
         <span class="toggle-link" onclick="toggleView('login')">Already have an account? Log in.</span>
     </div>
 
-    <!-- DASHBOARD SCREEN (Visible after successful login/registration) -->
-    <div class="container" id="dashboardArea" style="max-width: 800px;">
-        <h2 id="welcomeMessage">Welcome!</h2>
-        <p>Your Role: <strong id="userRoleDisplay"></strong></p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-        <p><em>(The ticket management dashboard will be built here next)</em></p>
-        <button onclick="logout()" style="width: auto; padding: 8px 16px; background-color: #dc3545; margin-top: 20px;">Log Out</button>
+    <!-- DASHBOARD SCREEN -->
+    <div class="container dashboard-container" id="dashboardArea">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+            <div>
+                <h2 id="welcomeMessage" style="margin: 0;">Welcome!</h2>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Role: <strong id="userRoleDisplay"></strong></p>
+            </div>
+            <button onclick="logout()" class="btn-danger">Log Out</button>
+        </div>
+
+        <!-- Submit Request Form -->
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 30px;">
+            <h3>Raise a New Request</h3>
+            <form id="requestForm">
+                <div class="input-group">
+                    <label>Request Type</label>
+                    <select id="reqType" required>
+                        <option value="">Select a type...</option>
+                        <option value="New Project">New Project</option>
+                        <option value="Change to Existing System">Change to Existing System</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Description</label>
+                    <textarea id="reqDesc" required rows="3" placeholder="Briefly describe the requirements..."></textarea>
+                </div>
+                <button type="submit" id="submitReqBtn" class="btn-success">Submit Request</button>
+                <div id="reqMessage" style="margin-top: 10px; font-size: 14px; font-weight: bold; display: none;"></div>
+            </form>
+        </div>
+
+        <!-- View Tickets Table -->
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>My Requests</h3>
+                <button onclick="loadTickets()" style="width: auto; padding: 6px 12px; font-size: 12px; background-color: #6c757d;">Refresh Data</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">Ticket ID</th>
+                        <th width="25%">Type</th>
+                        <th width="45%">Description</th>
+                        <th width="15%">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketTableBody">
+                    <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec"; 
-
-        // --- DOM Elements ---
-        const loginArea = document.getElementById('loginArea');
-        const registerArea = document.getElementById('registerArea');
-        const dashboardArea = document.getElementById('dashboardArea');
+        const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec; 
 
         // --- View Toggler ---
         function toggleView(view) {
-            loginArea.style.display = 'none';
-            registerArea.style.display = 'none';
-            dashboardArea.style.display = 'none';
-            
-            // Clear errors when switching
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('registerArea').style.display = 'none';
+            document.getElementById('dashboardArea').style.display = 'none';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('registerError').style.display = 'none';
-
-            if (view === 'login') loginArea.style.display = 'block';
-            if (view === 'register') registerArea.style.display = 'block';
-            if (view === 'dashboard') dashboardArea.style.display = 'block';
+            
+            document.getElementById(view + 'Area').style.display = 'block';
         }
 
         // --- Login Logic ---
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            const errorDiv = document.getElementById('loginError');
-            
-            btn.disabled = true; 
-            btn.innerText = "Authenticating..."; 
-            errorDiv.style.display = "none";
-
-            const payload = {
-                action: "login",
-                userID: document.getElementById('loginUserID').value,
-                password: document.getElementById('loginPassword').value
-            };
-
+            const btn = document.getElementById('loginBtn'); const err = document.getElementById('loginError');
+            btn.disabled = true; btn.innerText = "Authenticating..."; err.style.display = "none";
+            const payload = { action: "login", userID: document.getElementById('loginUserID').value, password: document.getElementById('loginPassword').value };
             try {
-                const response = await fetch(API_URL, { 
-                    method: "POST", 
-                    body: JSON.stringify(payload) 
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    setupDashboard(result.user);
-                } else {
-                    errorDiv.innerText = result.message; 
-                    errorDiv.style.display = "block";
-                }
-            } catch (err) {
-                errorDiv.innerText = "Network error connecting to API."; 
-                errorDiv.style.display = "block";
-                console.error(err);
-            } finally {
-                btn.disabled = false; 
-                btn.innerText = "Log In";
-            }
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.success) setupDashboard(result.user);
+                else { err.innerText = result.message; err.style.display = "block"; }
+            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } 
+            finally { btn.disabled = false; btn.innerText = "Log In"; }
         });
 
         // --- Registration Logic ---
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = document.getElementById('registerBtn');
-            const errorDiv = document.getElementById('registerError');
-            
-            btn.disabled = true; 
-            btn.innerText = "Registering..."; 
-            errorDiv.style.display = "none";
-
-            const payload = {
-                action: "register",
-                userID: document.getElementById('regUserID').value,
-                name: document.getElementById('regName').value,
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value
-            };
-
+            const btn = document.getElementById('registerBtn'); const err = document.getElementById('registerError');
+            btn.disabled = true; btn.innerText = "Registering..."; err.style.display = "none";
+            const payload = { action: "register", userID: document.getElementById('regUserID').value, name: document.getElementById('regName').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPassword').value };
             try {
-                const response = await fetch(API_URL, { 
-                    method: "POST", 
-                    body: JSON.stringify(payload) 
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    alert("Registration successful! Logging you in...");
-                    document.getElementById('registerForm').reset();
-                    setupDashboard(result.user); // Auto log them in
-                } else {
-                    errorDiv.innerText = result.message; 
-                    errorDiv.style.display = "block";
-                }
-            } catch (err) {
-                errorDiv.innerText = "Network error connecting to API."; 
-                errorDiv.style.display = "block";
-                console.error(err);
-            } finally {
-                btn.disabled = false; 
-                btn.innerText = "Register";
-            }
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.success) { document.getElementById('registerForm').reset(); setupDashboard(result.user); }
+                else { err.innerText = result.message; err.style.display = "block"; }
+            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } 
+            finally { btn.disabled = false; btn.innerText = "Register"; }
         });
 
-        // --- Dashboard & Session Management ---
+        // --- Submit Request Logic ---
+        document.getElementById('requestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitReqBtn'); const msg = document.getElementById('reqMessage');
+            btn.disabled = true; btn.innerText = "Submitting..."; msg.style.display = "none";
+            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            
+            const payload = { action: "new_request", submitterID: user.userID, type: document.getElementById('reqType').value, description: document.getElementById('reqDesc').value };
+            try {
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.success) {
+                    msg.innerText = "Success! Ticket created: " + result.ticketID; msg.style.color = "#155724"; msg.style.display = "block";
+                    document.getElementById('requestForm').reset();
+                    loadTickets(); // Refresh table immediately
+                } else { msg.innerText = "Error submitting."; msg.style.color = "#d9534f"; msg.style.display = "block"; }
+            } catch (error) { msg.innerText = "Network error."; msg.style.color = "#d9534f"; msg.style.display = "block"; } 
+            finally { btn.disabled = false; btn.innerText = "Submit Request"; }
+        });
+
+        // --- Load Tickets Data ---
+        async function loadTickets() {
+            const tbody = document.getElementById('ticketTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Fetching data...</td></tr>';
+            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            const payload = { action: "get_tickets", userID: user.userID, role: user.role };
+
+            try {
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const result = await res.json();
+                
+                if (result.success) {
+                    tbody.innerHTML = '';
+                    if (result.tickets.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No requests found.</td></tr>'; return; }
+                    
+                    // Render rows backwards so newest tickets are at the top
+                    result.tickets.reverse().forEach(ticket => {
+                        let badgeClass = "status-pending";
+                        if(ticket.status !== "Pending Approval") badgeClass = "status-approved"; // Simplistic check for PoC
+                        if(ticket.status === "Closed") badgeClass = "status-closed";
+
+                        tbody.innerHTML += `<tr>
+                            <td><strong>${ticket.ticketID}</strong></td>
+                            <td>${ticket.type}</td>
+                            <td>${ticket.description}</td>
+                            <td><span class="status-badge ${badgeClass}">${ticket.status}</span></td>
+                        </tr>`;
+                    });
+                }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading tickets.</td></tr>'; }
+        }
+
+        // --- Dashboard & Session ---
         function setupDashboard(user) {
             toggleView('dashboard');
             document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
             document.getElementById('userRoleDisplay').innerText = user.role;
-            
-            // Save user data in the browser so they stay logged in if they refresh
             sessionStorage.setItem('itsd_user', JSON.stringify(user));
+            loadTickets(); // Fetch tickets as soon as they land on the dashboard
         }
 
         function logout() {
-            sessionStorage.removeItem('itsd_user');
-            document.getElementById('loginForm').reset();
-            toggleView('login');
+            sessionStorage.removeItem('itsd_user'); document.getElementById('loginForm').reset(); toggleView('login');
         }
 
-        // Auto-login check when the page loads
         window.onload = function() {
             const savedUser = sessionStorage.getItem('itsd_user');
-            if (savedUser) {
-                setupDashboard(JSON.parse(savedUser));
-            }
+            if (savedUser) setupDashboard(JSON.parse(savedUser));
         };
     </script>
 </body>
