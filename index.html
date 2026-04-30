@@ -3,214 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITSD System - Login</title>
+    <title>ITSD System</title>
     <style>
-        /* Basic Styling for a clean, modern look */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h2 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #004494;
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        #errorMessage {
-            color: #d9534f;
-            margin-top: 15px;
-            font-size: 14px;
-            display: none; /* Hidden by default */
-        }
-
-        /* This is the dashboard section, hidden initially */
-        #dashboardArea {
-            display: none;
-        }
+        /* Clean and modern styling */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { margin-top: 0; color: #333; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #004494; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .error-message { color: #d9534f; margin-top: 15px; font-size: 14px; display: none; }
+        .toggle-link { margin-top: 20px; font-size: 14px; color: #0056b3; cursor: pointer; display: inline-block; }
+        .toggle-link:hover { text-decoration: underline; }
+        
+        /* Layout Management - Hide sections by default */
+        #registerArea, #dashboardArea { display: none; }
     </style>
 </head>
 <body>
 
     <!-- LOGIN SCREEN -->
     <div class="container" id="loginArea">
-        <h2>ITSD System</h2>
-        <p style="color: #777; font-size: 14px; margin-bottom: 25px;">Please log in to continue</p>
-        
+        <h2>ITSD System Login</h2>
         <form id="loginForm">
             <div class="input-group">
-                <label for="userID">User ID</label>
-                <input type="text" id="userID" required placeholder="Enter your User ID">
+                <label for="loginUserID">User ID</label>
+                <input type="text" id="loginUserID" required placeholder="Enter your User ID">
             </div>
-            
             <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="Enter your password">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required placeholder="Enter your password">
             </div>
-            
             <button type="submit" id="loginBtn">Log In</button>
-            <div id="errorMessage">Invalid UserID or Password.</div>
+            <div id="loginError" class="error-message"></div>
         </form>
+        <span class="toggle-link" onclick="toggleView('register')">Don't have an account? Register here.</span>
     </div>
 
-    <!-- DASHBOARD SCREEN (Visible after login) -->
+    <!-- REGISTER SCREEN -->
+    <div class="container" id="registerArea">
+        <h2>Register New Account</h2>
+        <form id="registerForm">
+            <div class="input-group">
+                <label for="regUserID">Employee / User ID</label>
+                <input type="text" id="regUserID" required placeholder="Choose a User ID">
+            </div>
+            <div class="input-group">
+                <label for="regName">Full Name</label>
+                <input type="text" id="regName" required placeholder="Enter your name">
+            </div>
+            <div class="input-group">
+                <label for="regEmail">Email Address</label>
+                <input type="email" id="regEmail" required placeholder="Enter your email">
+            </div>
+            <div class="input-group">
+                <label for="regPassword">Password (For PoC Use Only)</label>
+                <input type="password" id="regPassword" required placeholder="Create a password">
+            </div>
+            <button type="submit" id="registerBtn">Register</button>
+            <div id="registerError" class="error-message"></div>
+        </form>
+        <span class="toggle-link" onclick="toggleView('login')">Already have an account? Log in.</span>
+    </div>
+
+    <!-- DASHBOARD SCREEN (Visible after successful login/registration) -->
     <div class="container" id="dashboardArea" style="max-width: 800px;">
         <h2 id="welcomeMessage">Welcome!</h2>
         <p>Your Role: <strong id="userRoleDisplay"></strong></p>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-        <p><em>(The ticket management dashboard will be built here in the next step)</em></p>
-        <button onclick="logout()" style="width: auto; padding: 8px 16px; background-color: #dc3545;">Log Out</button>
+        <p><em>(The ticket management dashboard will be built here next)</em></p>
+        <button onclick="logout()" style="width: auto; padding: 8px 16px; background-color: #dc3545; margin-top: 20px;">Log Out</button>
     </div>
 
     <script>
         // --- CONFIGURATION ---
-        // REPLACE THIS URL with the Web App URL from your Google Apps Script deployment
         const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec"; 
 
         // --- DOM Elements ---
-        const loginForm = document.getElementById('loginForm');
-        const loginBtn = document.getElementById('loginBtn');
-        const errorMessage = document.getElementById('errorMessage');
         const loginArea = document.getElementById('loginArea');
+        const registerArea = document.getElementById('registerArea');
         const dashboardArea = document.getElementById('dashboardArea');
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const userRoleDisplay = document.getElementById('userRoleDisplay');
 
-        // --- Event Listener for Form Submission ---
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Prevent the page from reloading
+        // --- View Toggler ---
+        function toggleView(view) {
+            loginArea.style.display = 'none';
+            registerArea.style.display = 'none';
+            dashboardArea.style.display = 'none';
             
-            const userID = document.getElementById('userID').value;
-            const password = document.getElementById('password').value;
+            // Clear errors when switching
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('registerError').style.display = 'none';
 
-            // UI update: disable button and show loading state
-            loginBtn.disabled = true;
-            loginBtn.innerText = "Authenticating...";
-            errorMessage.style.display = "none";
+            if (view === 'login') loginArea.style.display = 'block';
+            if (view === 'register') registerArea.style.display = 'block';
+            if (view === 'dashboard') dashboardArea.style.display = 'block';
+        }
 
-            const requestPayload = {
+        // --- Login Logic ---
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+            
+            btn.disabled = true; 
+            btn.innerText = "Authenticating..."; 
+            errorDiv.style.display = "none";
+
+            const payload = {
                 action: "login",
-                userID: userID,
-                password: password
+                userID: document.getElementById('loginUserID').value,
+                password: document.getElementById('loginPassword').value
             };
 
             try {
-                // Send the data to your Google Apps Script API
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify(requestPayload)
+                const response = await fetch(API_URL, { 
+                    method: "POST", 
+                    body: JSON.stringify(payload) 
                 });
-
                 const result = await response.json();
 
                 if (result.success) {
-                    // Login Success
-                    showDashboard(result.user);
+                    setupDashboard(result.user);
                 } else {
-                    // Login Failed (Wrong ID or Password)
-                    showError(result.message || "Invalid UserID or Password.");
+                    errorDiv.innerText = result.message; 
+                    errorDiv.style.display = "block";
                 }
-            } catch (error) {
-                console.error("Connection Error:", error);
-                showError("Network error. Could not connect to the system.");
+            } catch (err) {
+                errorDiv.innerText = "Network error connecting to API."; 
+                errorDiv.style.display = "block";
+                console.error(err);
             } finally {
-                // Reset UI
-                loginBtn.disabled = false;
-                loginBtn.innerText = "Log In";
+                btn.disabled = false; 
+                btn.innerText = "Log In";
             }
         });
 
-        // --- Helper Functions ---
-        function showError(msg) {
-            errorMessage.innerText = msg;
-            errorMessage.style.display = "block";
-        }
-
-        function showDashboard(user) {
-            // Hide the login area
-            loginArea.style.display = "none";
-            // Show the dashboard area
-            dashboardArea.style.display = "block";
+        // --- Registration Logic ---
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            const errorDiv = document.getElementById('registerError');
             
-            // Populate user details
-            welcomeMessage.innerText = "Welcome back, " + user.name + "!";
-            userRoleDisplay.innerText = user.role;
+            btn.disabled = true; 
+            btn.innerText = "Registering..."; 
+            errorDiv.style.display = "none";
 
-            // In the future, you can save the user data to sessionStorage here 
-            // so they don't have to log in again if they refresh the page.
+            const payload = {
+                action: "register",
+                userID: document.getElementById('regUserID').value,
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value
+            };
+
+            try {
+                const response = await fetch(API_URL, { 
+                    method: "POST", 
+                    body: JSON.stringify(payload) 
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert("Registration successful! Logging you in...");
+                    document.getElementById('registerForm').reset();
+                    setupDashboard(result.user); // Auto log them in
+                } else {
+                    errorDiv.innerText = result.message; 
+                    errorDiv.style.display = "block";
+                }
+            } catch (err) {
+                errorDiv.innerText = "Network error connecting to API."; 
+                errorDiv.style.display = "block";
+                console.error(err);
+            } finally {
+                btn.disabled = false; 
+                btn.innerText = "Register";
+            }
+        });
+
+        // --- Dashboard & Session Management ---
+        function setupDashboard(user) {
+            toggleView('dashboard');
+            document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
+            document.getElementById('userRoleDisplay').innerText = user.role;
+            
+            // Save user data in the browser so they stay logged in if they refresh
             sessionStorage.setItem('itsd_user', JSON.stringify(user));
         }
 
         function logout() {
-            // Clear session and reset UI
             sessionStorage.removeItem('itsd_user');
-            document.getElementById('userID').value = "";
-            document.getElementById('password').value = "";
-            dashboardArea.style.display = "none";
-            loginArea.style.display = "block";
+            document.getElementById('loginForm').reset();
+            toggleView('login');
         }
 
-        // Auto-login check (optional: checks if user refreshed the page but is still logged in)
+        // Auto-login check when the page loads
         window.onload = function() {
             const savedUser = sessionStorage.getItem('itsd_user');
             if (savedUser) {
-                showDashboard(JSON.parse(savedUser));
+                setupDashboard(JSON.parse(savedUser));
             }
         };
     </script>
