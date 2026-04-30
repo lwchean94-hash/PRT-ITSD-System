@@ -37,6 +37,10 @@
         .meta-text { font-size: 11px; color: #666; display: block; margin-top: 4px; }
 
         #registerArea, #dashboardArea { display: none; }
+
+        /* Modal Styling for Assignment */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 350px; text-align: left; }
     </style>
 </head>
 <body>
@@ -111,13 +115,35 @@
                             <th width="30%">Description</th>
                             <th width="15%">Status</th>
                             <th width="15%">Lifecycle Details</th>
-                            <!-- Admin column injected via JS if role === Admin -->
+                            <!-- Actions column injected dynamically if Admin or Executor -->
                         </tr>
                     </thead>
                     <tbody id="ticketTableBody">
                         <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSIGN WORKER MODAL -->
+    <div id="assignModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Assign Worker</h3>
+            <p style="font-size: 13px; color: #666; margin-top: 0;">Select an Executor to assign to this ticket.</p>
+            
+            <div class="input-group">
+                <label>Select Executor:</label>
+                <select id="executorDropdown" required>
+                    <option value="">Fetching list...</option>
+                </select>
+            </div>
+            
+            <input type="hidden" id="activeAssignTicketID">
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-success" id="confirmAssignBtn" style="flex: 1;" onclick="confirmAssignment()">Confirm Assignment</button>
+                <button class="btn-danger" style="flex: 1;" onclick="closeModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -139,7 +165,7 @@
         document.getElementById('logoutBtn').addEventListener('click', logout);
         document.getElementById('refreshDataBtn').addEventListener('click', loadTickets);
 
-        // --- Auth & Submission Logic (Unchanged) ---
+        // --- Auth & Submission Logic ---
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault(); const btn = document.getElementById('loginBtn'); const err = document.getElementById('loginError');
             btn.disabled = true; btn.innerText = "Authenticating..."; err.style.display = "none";
@@ -178,10 +204,16 @@
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
             if (!user) return; 
 
-            // Adjust Table Header for Admin
-            document.getElementById('tableTitle').innerText = user.role === 'Admin' ? "All Requests (Admin View)" : "My Requests";
-            if (user.role === 'Admin' && headerRow.cells.length === 5) {
-                const th = document.createElement('th'); th.width = "15%"; th.innerText = "Admin Actions"; headerRow.appendChild(th);
+            const canManage = (user.role === 'Admin' || user.role === 'Executor');
+
+            // Dynamic Table Header Title
+            if (user.role === 'Admin') document.getElementById('tableTitle').innerText = "All Requests (Admin View)";
+            else if (user.role === 'Executor') document.getElementById('tableTitle').innerText = "All Requests (Executor View)";
+            else document.getElementById('tableTitle').innerText = "My Requests";
+
+            // Add Actions Column Header if they have permission
+            if (canManage && headerRow.cells.length === 5) {
+                const th = document.createElement('th'); th.width = "15%"; th.innerText = "Actions"; headerRow.appendChild(th);
             }
 
             const payload = { action: "get_tickets", userID: user.userID, role: user.role };
@@ -192,7 +224,7 @@
                 
                 if (result.success) {
                     tbody.innerHTML = '';
-                    if (result.tickets.length === 0) { tbody.innerHTML = `<tr><td colspan="${user.role === 'Admin' ? '6' : '5'}" style="text-align: center;">No requests found.</td></tr>`; return; }
+                    if (result.tickets.length === 0) { tbody.innerHTML = `<tr><td colspan="${canManage ? '6' : '5'}" style="text-align: center;">No requests found.</td></tr>`; return; }
                     
                     result.tickets.reverse().forEach(ticket => {
                         let badgeClass = "status-pending";
@@ -200,7 +232,6 @@
                         if(ticket.status === "In Progress") badgeClass = "status-progress";
                         if(ticket.status === "Closed") badgeClass = "status-closed";
 
-                        // Build the Lifecycle text
                         let metaInfo = "";
                         if (ticket.approverName) metaInfo += `<span class="meta-text">Approved by: ${ticket.approverName}</span>`;
                         if (ticket.assignedTo) metaInfo += `<span class="meta-text">Assigned to: ${ticket.assignedTo} (${ticket.dateAssigned})</span>`;
@@ -214,17 +245,18 @@
                             <td>${metaInfo || '<span class="meta-text">No data yet</span>'}</td>
                         `;
 
-                        // Add Admin Action Buttons
-                        if (user.role === 'Admin') {
+                        // Action Buttons Logic
+                        if (canManage) {
                             let actionBtn = "";
-                            if (ticket.status === "Pending Approval") {
-                                actionBtn = `<button class="btn-success" onclick="updateTicket('${ticket.ticketID}', 'approve')">Approve</button>`;
-                            } else if (ticket.status === "Approved") {
-                                actionBtn = `<button class="btn-primary" onclick="updateTicket('${ticket.ticketID}', 'assign')">Assign Worker</button>`;
+                            if (ticket.status === "Pending Approval" && user.role === 'Admin') {
+                                actionBtn = `<button class="btn-success" onclick="executeSimpleUpdate('${ticket.ticketID}', 'approve')">Approve</button>`;
+                            } else if (ticket.status === "Approved" && user.role === 'Admin') {
+                                actionBtn = `<button class="btn-primary" onclick="openAssignModal('${ticket.ticketID}')">Assign Worker</button>`;
                             } else if (ticket.status === "In Progress") {
-                                actionBtn = `<button class="btn-danger" onclick="updateTicket('${ticket.ticketID}', 'close')">Close Ticket</button>`;
+                                // Both Admin and Executor can close
+                                actionBtn = `<button class="btn-danger" onclick="executeSimpleUpdate('${ticket.ticketID}', 'close')">Close Ticket</button>`;
                             } else {
-                                actionBtn = `<span class="meta-text">Resolved</span>`;
+                                actionBtn = `<span class="meta-text">No Action Needed</span>`;
                             }
                             rowHTML += `<td>${actionBtn}</td>`;
                         }
@@ -236,33 +268,80 @@
             } catch (error) { tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Error loading tickets.</td></tr>`; }
         }
 
-        // --- Ticket Action Logic ---
-        async function updateTicket(ticketID, actionType) {
+        // --- Ticket Actions (Approve / Close) ---
+        async function executeSimpleUpdate(ticketID, actionType) {
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
             const payload = { action: "update_ticket", ticketID: ticketID, updateType: actionType };
-
-            if (actionType === 'approve') {
-                payload.approverName = user.name; // Automatically use the Admin's name
-            } else if (actionType === 'assign') {
-                const workerName = prompt("Enter the name of the worker to assign this to:");
-                if (!workerName) return; // Cancel if empty
-                payload.assignedTo = workerName;
-            }
+            if (actionType === 'approve') payload.approverName = user.name; 
 
             try {
-                // To keep UI responsive, we could add a loading state here, but we'll just await and refresh
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
-                if (result.success) {
-                    loadTickets(); // Refresh table to show new status
+                if (result.success) loadTickets(); 
+                else alert("Failed to update ticket: " + result.message);
+            } catch (error) { alert("Network error."); }
+        }
+
+        // --- Assignment Modal Logic ---
+        async function openAssignModal(ticketID) {
+            document.getElementById('activeAssignTicketID').value = ticketID;
+            document.getElementById('assignModal').style.display = 'flex';
+            
+            const dropdown = document.getElementById('executorDropdown');
+            dropdown.innerHTML = '<option value="">Fetching list...</option>';
+            document.getElementById('confirmAssignBtn').disabled = true;
+
+            // Fetch list of Executors
+            try {
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "get_executors" }) });
+                const result = await res.json();
+                
+                if (result.success && result.executors.length > 0) {
+                    dropdown.innerHTML = '<option value="">Select someone...</option>';
+                    result.executors.forEach(name => {
+                        dropdown.innerHTML += `<option value="${name}">${name}</option>`;
+                    });
+                    document.getElementById('confirmAssignBtn').disabled = false;
                 } else {
-                    alert("Failed to update ticket: " + result.message);
+                    dropdown.innerHTML = '<option value="">No Executors found</option>';
                 }
             } catch (error) {
-                alert("Network error while updating ticket.");
+                dropdown.innerHTML = '<option value="">Error loading list</option>';
             }
         }
 
+        function closeModal() {
+            document.getElementById('assignModal').style.display = 'none';
+            document.getElementById('activeAssignTicketID').value = "";
+        }
+
+        async function confirmAssignment() {
+            const ticketID = document.getElementById('activeAssignTicketID').value;
+            const workerName = document.getElementById('executorDropdown').value;
+            
+            if (!workerName) { alert("Please select an Executor."); return; }
+            
+            const btn = document.getElementById('confirmAssignBtn');
+            btn.innerText = "Assigning..."; btn.disabled = true;
+
+            const payload = { action: "update_ticket", ticketID: ticketID, updateType: "assign", assignedTo: workerName };
+
+            try {
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.success) {
+                    closeModal();
+                    loadTickets(); 
+                } else {
+                    alert("Failed to assign ticket.");
+                }
+            } catch (error) { alert("Network error."); }
+            finally {
+                btn.innerText = "Confirm Assignment"; btn.disabled = false;
+            }
+        }
+
+        // --- Setup ---
         function setupDashboard(user) {
             toggleView('dashboard');
             document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
