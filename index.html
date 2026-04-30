@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITSD System - Login</title>
+    <style>
+        /* Basic Styling for a clean, modern look */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004494;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #errorMessage {
+            color: #d9534f;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none; /* Hidden by default */
+        }
+
+        /* This is the dashboard section, hidden initially */
+        #dashboardArea {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div class="container" id="loginArea">
+        <h2>ITSD System</h2>
+        <p style="color: #777; font-size: 14px; margin-bottom: 25px;">Please log in to continue</p>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="userID">User ID</label>
+                <input type="text" id="userID" required placeholder="Enter your User ID">
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" id="loginBtn">Log In</button>
+            <div id="errorMessage">Invalid UserID or Password.</div>
+        </form>
+    </div>
+
+    <!-- DASHBOARD SCREEN (Visible after login) -->
+    <div class="container" id="dashboardArea" style="max-width: 800px;">
+        <h2 id="welcomeMessage">Welcome!</h2>
+        <p>Your Role: <strong id="userRoleDisplay"></strong></p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p><em>(The ticket management dashboard will be built here in the next step)</em></p>
+        <button onclick="logout()" style="width: auto; padding: 8px 16px; background-color: #dc3545;">Log Out</button>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // REPLACE THIS URL with the Web App URL from your Google Apps Script deployment
+        const API_URL = "YOUR_WEB_APP_URL_HERE"; 
+
+        // --- DOM Elements ---
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginArea = document.getElementById('loginArea');
+        const dashboardArea = document.getElementById('dashboardArea');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const userRoleDisplay = document.getElementById('userRoleDisplay');
+
+        // --- Event Listener for Form Submission ---
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent the page from reloading
+            
+            const userID = document.getElementById('userID').value;
+            const password = document.getElementById('password').value;
+
+            // UI update: disable button and show loading state
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Authenticating...";
+            errorMessage.style.display = "none";
+
+            const requestPayload = {
+                action: "login",
+                userID: userID,
+                password: password
+            };
+
+            try {
+                // Send the data to your Google Apps Script API
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(requestPayload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Login Success
+                    showDashboard(result.user);
+                } else {
+                    // Login Failed (Wrong ID or Password)
+                    showError(result.message || "Invalid UserID or Password.");
+                }
+            } catch (error) {
+                console.error("Connection Error:", error);
+                showError("Network error. Could not connect to the system.");
+            } finally {
+                // Reset UI
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Log In";
+            }
+        });
+
+        // --- Helper Functions ---
+        function showError(msg) {
+            errorMessage.innerText = msg;
+            errorMessage.style.display = "block";
+        }
+
+        function showDashboard(user) {
+            // Hide the login area
+            loginArea.style.display = "none";
+            // Show the dashboard area
+            dashboardArea.style.display = "block";
+            
+            // Populate user details
+            welcomeMessage.innerText = "Welcome back, " + user.name + "!";
+            userRoleDisplay.innerText = user.role;
+
+            // In the future, you can save the user data to sessionStorage here 
+            // so they don't have to log in again if they refresh the page.
+            sessionStorage.setItem('itsd_user', JSON.stringify(user));
+        }
+
+        function logout() {
+            // Clear session and reset UI
+            sessionStorage.removeItem('itsd_user');
+            document.getElementById('userID').value = "";
+            document.getElementById('password').value = "";
+            dashboardArea.style.display = "none";
+            loginArea.style.display = "block";
+        }
+
+        // Auto-login check (optional: checks if user refreshed the page but is still logged in)
+        window.onload = function() {
+            const savedUser = sessionStorage.getItem('itsd_user');
+            if (savedUser) {
+                showDashboard(JSON.parse(savedUser));
+            }
+        };
+    </script>
+</body>
+</html>
