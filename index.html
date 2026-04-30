@@ -20,10 +20,9 @@
         .btn-success { background-color: #28a745; }
         .btn-success:hover { background-color: #218838; }
         .error-message { color: #d9534f; margin-top: 15px; font-size: 14px; display: none; }
-        .toggle-link { margin-top: 20px; font-size: 14px; color: #0056b3; cursor: pointer; display: inline-block; }
+        .toggle-link { margin-top: 20px; font-size: 14px; color: #0056b3; cursor: pointer; display: inline-block; font-weight: bold; }
         .toggle-link:hover { text-decoration: underline; }
         
-        /* Table Styling */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
         th { background-color: #f8f9fa; }
@@ -32,7 +31,7 @@
         .status-approved { background: #cce5ff; color: #004085; }
         .status-closed { background: #d4edda; color: #155724; }
 
-        /* Layout Management */
+        /* Hide specific sections by default */
         #registerArea, #dashboardArea { display: none; }
     </style>
 </head>
@@ -47,7 +46,7 @@
             <button type="submit" id="loginBtn">Log In</button>
             <div id="loginError" class="error-message"></div>
         </form>
-        <span class="toggle-link" onclick="toggleView('register')">Don't have an account? Register here.</span>
+        <span class="toggle-link" id="showRegisterLink">Don't have an account? Register here.</span>
     </div>
 
     <!-- REGISTER SCREEN -->
@@ -61,7 +60,7 @@
             <button type="submit" id="registerBtn">Register</button>
             <div id="registerError" class="error-message"></div>
         </form>
-        <span class="toggle-link" onclick="toggleView('login')">Already have an account? Log in.</span>
+        <span class="toggle-link" id="showLoginLink">Already have an account? Log in.</span>
     </div>
 
     <!-- DASHBOARD SCREEN -->
@@ -71,10 +70,9 @@
                 <h2 id="welcomeMessage" style="margin: 0;">Welcome!</h2>
                 <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Role: <strong id="userRoleDisplay"></strong></p>
             </div>
-            <button onclick="logout()" class="btn-danger">Log Out</button>
+            <button id="logoutBtn" class="btn-danger">Log Out</button>
         </div>
 
-        <!-- Submit Request Form -->
         <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 30px;">
             <h3>Raise a New Request</h3>
             <form id="requestForm">
@@ -95,11 +93,10 @@
             </form>
         </div>
 
-        <!-- View Tickets Table -->
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3>My Requests</h3>
-                <button onclick="loadTickets()" style="width: auto; padding: 6px 12px; font-size: 12px; background-color: #6c757d;">Refresh Data</button>
+                <button id="refreshDataBtn" style="width: auto; padding: 6px 12px; font-size: 12px; background-color: #6c757d;">Refresh Data</button>
             </div>
             <table>
                 <thead>
@@ -118,74 +115,150 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec"; 
 
-        // --- View Toggler ---
+        // --- Screen Switching Logic ---
         function toggleView(view) {
+            console.log("Switching view to: " + view);
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('registerArea').style.display = 'none';
             document.getElementById('dashboardArea').style.display = 'none';
+            
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('registerError').style.display = 'none';
             
             document.getElementById(view + 'Area').style.display = 'block';
         }
 
+        document.getElementById('showRegisterLink').addEventListener('click', () => toggleView('register'));
+        document.getElementById('showLoginLink').addEventListener('click', () => toggleView('login'));
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('refreshDataBtn').addEventListener('click', loadTickets);
+
         // --- Login Logic ---
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = document.getElementById('loginBtn'); const err = document.getElementById('loginError');
-            btn.disabled = true; btn.innerText = "Authenticating..."; err.style.display = "none";
-            const payload = { action: "login", userID: document.getElementById('loginUserID').value, password: document.getElementById('loginPassword').value };
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('loginError');
+            
+            btn.disabled = true; 
+            btn.innerText = "Authenticating..."; 
+            err.style.display = "none";
+            
+            const payload = { 
+                action: "login", 
+                userID: document.getElementById('loginUserID').value, 
+                password: document.getElementById('loginPassword').value 
+            };
+            
             try {
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
-                if (result.success) setupDashboard(result.user);
-                else { err.innerText = result.message; err.style.display = "block"; }
-            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } 
-            finally { btn.disabled = false; btn.innerText = "Log In"; }
+                
+                if (result.success) {
+                    setupDashboard(result.user);
+                } else { 
+                    err.innerText = result.message; 
+                    err.style.display = "block"; 
+                }
+            } catch (error) { 
+                err.innerText = "Network error connecting to API."; 
+                err.style.display = "block"; 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerText = "Log In"; 
+            }
         });
 
         // --- Registration Logic ---
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = document.getElementById('registerBtn'); const err = document.getElementById('registerError');
-            btn.disabled = true; btn.innerText = "Registering..."; err.style.display = "none";
-            const payload = { action: "register", userID: document.getElementById('regUserID').value, name: document.getElementById('regName').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPassword').value };
+            const btn = document.getElementById('registerBtn');
+            const err = document.getElementById('registerError');
+            
+            btn.disabled = true; 
+            btn.innerText = "Registering..."; 
+            err.style.display = "none";
+            
+            const payload = { 
+                action: "register", 
+                userID: document.getElementById('regUserID').value, 
+                name: document.getElementById('regName').value, 
+                email: document.getElementById('regEmail').value, 
+                password: document.getElementById('regPassword').value 
+            };
+            
             try {
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
-                if (result.success) { document.getElementById('registerForm').reset(); setupDashboard(result.user); }
-                else { err.innerText = result.message; err.style.display = "block"; }
-            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } 
-            finally { btn.disabled = false; btn.innerText = "Register"; }
+                
+                if (result.success) { 
+                    document.getElementById('registerForm').reset(); 
+                    setupDashboard(result.user); 
+                } else { 
+                    err.innerText = result.message; 
+                    err.style.display = "block"; 
+                }
+            } catch (error) { 
+                err.innerText = "Network error connecting to API."; 
+                err.style.display = "block"; 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerText = "Register"; 
+            }
         });
 
         // --- Submit Request Logic ---
         document.getElementById('requestForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = document.getElementById('submitReqBtn'); const msg = document.getElementById('reqMessage');
-            btn.disabled = true; btn.innerText = "Submitting..."; msg.style.display = "none";
-            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            const btn = document.getElementById('submitReqBtn');
+            const msg = document.getElementById('reqMessage');
             
-            const payload = { action: "new_request", submitterID: user.userID, type: document.getElementById('reqType').value, description: document.getElementById('reqDesc').value };
+            btn.disabled = true; 
+            btn.innerText = "Submitting..."; 
+            msg.style.display = "none";
+            
+            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            const payload = { 
+                action: "new_request", 
+                submitterID: user.userID, 
+                type: document.getElementById('reqType').value, 
+                description: document.getElementById('reqDesc').value 
+            };
+            
             try {
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
+                
                 if (result.success) {
-                    msg.innerText = "Success! Ticket created: " + result.ticketID; msg.style.color = "#155724"; msg.style.display = "block";
+                    msg.innerText = "Success! Ticket created: " + result.ticketID; 
+                    msg.style.color = "#155724"; 
+                    msg.style.display = "block";
                     document.getElementById('requestForm').reset();
-                    loadTickets(); // Refresh table immediately
-                } else { msg.innerText = "Error submitting."; msg.style.color = "#d9534f"; msg.style.display = "block"; }
-            } catch (error) { msg.innerText = "Network error."; msg.style.color = "#d9534f"; msg.style.display = "block"; } 
-            finally { btn.disabled = false; btn.innerText = "Submit Request"; }
+                    loadTickets();
+                } else { 
+                    msg.innerText = "Error submitting request."; 
+                    msg.style.color = "#d9534f"; 
+                    msg.style.display = "block"; 
+                }
+            } catch (error) { 
+                msg.innerText = "Network error."; 
+                msg.style.color = "#d9534f"; 
+                msg.style.display = "block"; 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerText = "Submit Request"; 
+            }
         });
 
         // --- Load Tickets Data ---
         async function loadTickets() {
             const tbody = document.getElementById('ticketTableBody');
             tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Fetching data...</td></tr>';
+            
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            if (!user) return; // Prevent crash if somehow called while logged out
+
             const payload = { action: "get_tickets", userID: user.userID, role: user.role };
 
             try {
@@ -194,12 +267,14 @@
                 
                 if (result.success) {
                     tbody.innerHTML = '';
-                    if (result.tickets.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No requests found.</td></tr>'; return; }
+                    if (result.tickets.length === 0) { 
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No requests found.</td></tr>'; 
+                        return; 
+                    }
                     
-                    // Render rows backwards so newest tickets are at the top
                     result.tickets.reverse().forEach(ticket => {
                         let badgeClass = "status-pending";
-                        if(ticket.status !== "Pending Approval") badgeClass = "status-approved"; // Simplistic check for PoC
+                        if(ticket.status !== "Pending Approval") badgeClass = "status-approved";
                         if(ticket.status === "Closed") badgeClass = "status-closed";
 
                         tbody.innerHTML += `<tr>
@@ -210,7 +285,9 @@
                         </tr>`;
                     });
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading tickets.</td></tr>'; }
+            } catch (error) { 
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading tickets.</td></tr>'; 
+            }
         }
 
         // --- Dashboard & Session ---
@@ -219,16 +296,23 @@
             document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
             document.getElementById('userRoleDisplay').innerText = user.role;
             sessionStorage.setItem('itsd_user', JSON.stringify(user));
-            loadTickets(); // Fetch tickets as soon as they land on the dashboard
+            loadTickets(); 
         }
 
         function logout() {
-            sessionStorage.removeItem('itsd_user'); document.getElementById('loginForm').reset(); toggleView('login');
+            sessionStorage.removeItem('itsd_user'); 
+            document.getElementById('loginForm').reset(); 
+            toggleView('login');
         }
 
+        // --- Initialize Page ---
         window.onload = function() {
             const savedUser = sessionStorage.getItem('itsd_user');
-            if (savedUser) setupDashboard(JSON.parse(savedUser));
+            if (savedUser) {
+                setupDashboard(JSON.parse(savedUser));
+            } else {
+                toggleView('login');
+            }
         };
     </script>
 </body>
