@@ -1,1 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hartalega ITSD - Admin Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+        body { background: #0a1628; font-family: 'Inter', sans-serif; color: #e8eaf0; margin: 0; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .hrt-grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(255,190,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,190,0,0.03) 1px, transparent 1px), radial-gradient(circle at center, rgba(10,22,40,0.85) 0%, rgba(10,22,40,0.65) 100%); background-size: 48px 48px, 48px 48px, cover; pointer-events: none; z-index: -2; }
+        .hrt-glow { position: fixed; top: -120px; left: 50%; transform: translateX(-50%); width: 800px; height: 400px; background: radial-gradient(ellipse, rgba(255,190,0,0.06) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+        .hrt-header { width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,190,0,0.15); background: rgba(10,22,40,0.8); backdrop-filter: blur(8px); z-index: 50; }
+        .hrt-logo-area { display: flex; align-items: center; gap: 14px; }
+        .hrt-logo-badge { width: 42px; height: 42px; border: 2px solid #FFBE00; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,190,0,0.08); }
+        .hrt-logo-badge svg { width: 24px; height: 24px; }
+        .hrt-logo-text { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 1px; color: #FFBE00; line-height: 1.1; }
+        .hrt-logo-sub { font-size: 10px; color: rgba(255,190,0,0.6); letter-spacing: 2px; font-weight: 400; text-transform: uppercase; }
+        .container { background: rgba(20, 36, 65, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255,190,0,0.2); padding: 40px; border-radius: 12px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); width: 90%; max-width: 1200px; text-align: left; box-sizing: border-box; margin-bottom: 40px; padding: 30px;}
+        h2, h3 { font-family: 'Rajdhani', sans-serif; margin-top: 0; color: #e8eaf0; letter-spacing: 1px; text-transform: uppercase;}
+        
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 8px; color: rgba(232,234,240,0.6); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
+        .input-group select { width: 100%; padding: 12px; box-sizing: border-box; font-size: 16px; background: rgba(10,22,40,0.6); border: 1px solid rgba(255,190,0,0.3); color: #FFBE00; font-family: 'Rajdhani', sans-serif; font-weight: 600; border-radius: 6px; outline: none; }
+        .input-group select option { background: #0a1628; color: #FFBE00; }
+        
+        button { width: 100%; padding: 12px; font-size: 16px; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; background-color: #FFBE00; color: #0a1628; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        button:hover { background-color: #ffce33; box-shadow: 0 0 15px rgba(255,190,0,0.4); }
+        .btn-danger { background-color: rgba(239, 68, 68, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px;}
+        .btn-success { background-color: rgba(16, 185, 129, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px;}
+        .btn-primary { background-color: rgba(59, 130, 246, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px;}
+        .btn-secondary { background-color: rgba(30, 50, 85, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px; border: 1px solid rgba(255,190,0,0.2);}
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; font-size: 13px; border: 1px solid rgba(255,190,0,0.15); border-radius: 8px; overflow: hidden;}
+        th, td { padding: 12px 15px; border-bottom: 1px solid rgba(255,190,0,0.1); text-align: left; vertical-align: middle; }
+        th { background-color: rgba(30, 50, 85, 0.6); color: rgba(232,234,240,0.8); font-family: 'Rajdhani', sans-serif; font-size: 14px; text-transform: uppercase;}
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: rgba(255,190,0,0.03); }
 
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; text-transform: uppercase;}
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: #FFBE00; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-approved { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-progress { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-closed { background: rgba(232, 234, 240, 0.1); color: #e8eaf0; border: 1px solid rgba(232, 234, 240, 0.3); }
+        .meta-text { font-size: 11px; color: rgba(232,234,240,0.5); display: block; margin-top: 4px; }
+
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;}
+        .metric-card { background: rgba(30, 50, 85, 0.4); border: 1px solid rgba(255,190,0,0.15); padding: 20px; border-radius: 8px; }
+        .metric-title { font-size: 12px; color: rgba(232,234,240,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block;}
+        .metric-value { font-family: 'Rajdhani', sans-serif; font-size: 32px; font-weight: 700; color: #FFBE00; line-height: 1; }
+        .metric-sub { font-size: 12px; color: rgba(232,234,240,0.5); margin-top: 8px; display: block;}
+        .exec-list { font-size: 13px; margin-top: 10px; line-height: 1.6;}
+        
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,22,40,0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: rgba(20, 36, 65, 0.95); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #FFBE00; box-shadow: 0 0 30px rgba(255,190,0,0.15);}
+    </style>
+</head>
+<body style="display: none;" id="bodyContent"> <!-- Hidden until auth check passes -->
+
+    <div class="hrt-grid-bg"></div><div class="hrt-glow"></div>
+
+    <nav class="hrt-header">
+        <div class="hrt-logo-area">
+            <div class="hrt-logo-badge">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="14" width="6" height="14" rx="1" fill="#FFBE00"/><rect x="13" y="8" width="6" height="20" rx="1" fill="#FFBE00"/><rect x="22" y="4" width="6" height="24" rx="1" fill="#FFBE00" opacity="0.7"/></svg>
+            </div>
+            <div><div class="hrt-logo-text">HARTALEGA</div><div class="hrt-logo-sub">Admin Command Center</div></div>
+        </div>
+    </nav>
+
+    <div class="container" id="dashboardArea">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,190,0,0.15); padding-bottom: 15px; margin-bottom: 20px;">
+            <div><h2 id="welcomeMessage" style="margin: 0; color: #FFBE00;">Welcome, Admin!</h2></div>
+            <button onclick="logout()" class="btn-secondary" style="width: auto;">Terminate Session</button>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span class="metric-title">Volume Overview</span>
+                <div style="display: flex; gap: 15px;">
+                    <div><span class="metric-value" id="kpiTotal">0</span><span class="metric-sub">Total</span></div>
+                    <div><span class="metric-value" style="color:#60a5fa" id="kpiPending">0</span><span class="metric-sub">Pending</span></div>
+                    <div><span class="metric-value" style="color:#34d399" id="kpiClosed">0</span><span class="metric-sub">Closed</span></div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <span class="metric-title">Efficiency Analytics</span>
+                <span class="metric-value" style="font-size: 24px;" id="kpiAvgApprove">0 Days</span><span class="metric-sub" style="margin-top:0;">Avg Time to Approve</span>
+                <div style="height:10px;"></div>
+                <span class="metric-value" style="font-size: 24px; color:#34d399;" id="kpiAvgExecute">0 Days</span><span class="metric-sub" style="margin-top:0;">Avg Time to Execute</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-title">Active Workload</span>
+                <div id="kpiWorkload" class="exec-list" style="color: #FFBE00;">Fetching data...</div>
+            </div>
+            <div class="metric-card" style="display: flex; flex-direction: column; align-items: center;">
+                <span class="metric-title" style="align-self: flex-start;">Classification Breakdown</span>
+                <div style="width: 120px; height: 120px;"><canvas id="classChart"></canvas></div>
+            </div>
+        </div>
+
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FFBE00;"></span> Global Registry</h3>
+                <button onclick="loadTickets()" class="btn-secondary">Sync Data</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th width="10%">ID</th><th width="15%">Classification</th><th width="30%">Description</th><th width="15%">Status</th><th width="15%">Lifecycle Trace</th><th width="15%">System Actions</th></tr></thead>
+                    <tbody id="ticketTableBody"><tr><td colspan="6" style="text-align: center;">Initializing datalink...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="assignModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:#e8eaf0">Assign Executor</h3>
+            <div class="input-group"><select id="executorDropdown" required><option value="">Fetching registry...</option></select></div>
+            <input type="hidden" id="activeAssignTicketID">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-success" id="confirmAssignBtn" style="flex: 1;" onclick="confirmAssignment()">Confirm</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="closeModal()">Abort</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbyTIu6rx3oOcARzFQTvytVbrSIj4hx3hrv5sNR_cfHANz25Dm4WLIV7RzyhcH8GUA3F/exec"; 
+        let classificationChart = null;
+
+        // --- SECURITY CHECK ---
+        window.onload = () => { 
+            const userStr = sessionStorage.getItem('itsd_user'); 
+            if (!userStr) { window.location.href = 'index.html'; return; }
+            
+            const user = JSON.parse(userStr);
+            if (user.role !== 'Admin') {
+                alert("Unauthorized Entry. This area requires Admin clearance.");
+                window.location.href = 'index.html';
+                return;
+            }
+            // Clearance accepted, show the page
+            document.getElementById('bodyContent').style.display = 'flex';
+            document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
+            loadTickets();
+        };
+
+        function calculateDaysBetween(startStr, endStr) {
+            if (!startStr || !endStr) return 0;
+            const start = new Date(startStr); const end = new Date(endStr);
+            if (isNaN(start) || isNaN(end)) return 0;
+            return Math.max(0, Math.floor((end - start) / (1000 * 60 * 60 * 24)));
+        }
+
+        function renderMetrics(tickets) {
+            let total = tickets.length; let pending = 0; let closed = 0; let inProgress = 0;
+            let projects = 0; let mods = 0;
+            let totalApproveTime = 0; let approveCount = 0; let totalExecTime = 0; let execCount = 0;
+            let executorLoad = {}; let agingCount = 0; const now = new Date();
+
+            tickets.forEach(t => {
+                if (t.status === "Pending Approval" || t.status === "Approved") pending++;
+                if (t.status === "In Progress") inProgress++;
+                if (t.status === "Closed") closed++;
+                if (t.type.includes("Project")) projects++; else mods++;
+
+                if (t.status === "In Progress" && t.assignedTo) {
+                    executorLoad[t.assignedTo] = (executorLoad[t.assignedTo] || 0) + 1;
+                    if (t.dateAssigned && calculateDaysBetween(t.dateAssigned, now.toLocaleDateString()) > 14) agingCount++;
+                }
+
+                if (t.dateSubmitted && t.dateApproved) { totalApproveTime += calculateDaysBetween(t.dateSubmitted, t.dateApproved); approveCount++; }
+                if (t.dateAssigned && t.dateCompleted) { totalExecTime += calculateDaysBetween(t.dateAssigned, t.dateCompleted); execCount++; }
+            });
+
+            document.getElementById('kpiTotal').innerText = total;
+            document.getElementById('kpiPending').innerText = pending + inProgress;
+            document.getElementById('kpiClosed').innerText = closed;
+            document.getElementById('kpiAvgApprove').innerText = approveCount > 0 ? (totalApproveTime / approveCount).toFixed(1) + " D" : "N/A";
+            document.getElementById('kpiAvgExecute').innerText = execCount > 0 ? (totalExecTime / execCount).toFixed(1) + " D" : "N/A";
+            
+            let loadHTML = "";
+            for (const [exec, count] of Object.entries(executorLoad)) { loadHTML += `<div>${exec}: <strong style="color:white">${count} active</strong></div>`; }
+            if (loadHTML === "") loadHTML = "<span style='color:rgba(232,234,240,0.5)'>No active tasks</span>";
+            if (agingCount > 0) loadHTML += `<div style="margin-top:10px; color:#ef4444; font-weight:bold; font-size:11px;">⚠️ ${agingCount} TICKET(S) > 14 DAYS</div>`;
+            document.getElementById('kpiWorkload').innerHTML = loadHTML;
+
+            const ctx = document.getElementById('classChart').getContext('2d');
+            if (classificationChart) classificationChart.destroy();
+            Chart.defaults.color = 'rgba(232, 234, 240, 0.7)';
+            classificationChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Projects', 'Mods'], datasets: [{ data: [projects, mods], backgroundColor: ['#3b82f6', '#FFBE00'], borderColor: '#0a1628', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { bodyFont: {family: 'Inter'} } } } });
+        }
+
+        async function loadTickets() {
+            const tbody = document.getElementById('ticketTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: rgba(232,234,240,0.5);">Syncing database...</td></tr>';
+            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            try {
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "get_tickets", userID: user.userID, role: user.role }) });
+                const result = await res.json();
+                
+                if (result.success) {
+                    renderMetrics(result.tickets);
+                    tbody.innerHTML = '';
+                    if (result.tickets.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No records.</td></tr>`; return; }
+                    
+                    result.tickets.reverse().forEach(ticket => {
+                        let badgeClass = "status-pending";
+                        if(ticket.status === "Approved") badgeClass = "status-approved";
+                        if(ticket.status === "In Progress") badgeClass = "status-progress";
+                        if(ticket.status === "Closed") badgeClass = "status-closed";
+
+                        let meta = "";
+                        if (ticket.dateSubmitted) meta += `<span class="meta-text">INIT: ${ticket.dateSubmitted}</span>`;
+                        if (ticket.approverName) meta += `<span class="meta-text">AUTH: ${ticket.approverName} [${ticket.dateApproved}]</span>`;
+                        if (ticket.assignedTo) meta += `<span class="meta-text">EXEC: ${ticket.assignedTo} [${ticket.dateAssigned}]</span>`;
+                        if (ticket.dateCompleted) meta += `<span class="meta-text">TERM: ${ticket.dateCompleted}</span>`;
+
+                        let rowHTML = `<tr><td><strong style="color: #FFBE00;">${ticket.ticketID}</strong></td><td>${ticket.type}</td><td>${ticket.description}</td><td><span class="status-badge ${badgeClass}">${ticket.status}</span></td><td>${meta || '-'}</td>`;
+
+                        let actionBtn = `<span class="meta-text">LOCKED</span>`;
+                        if (ticket.status === "Pending Approval") actionBtn = `<button class="btn-success" onclick="executeUpdate('${ticket.ticketID}', 'approve')">Approve</button>`;
+                        else if (ticket.status === "Approved") actionBtn = `<button class="btn-primary" onclick="openAssignModal('${ticket.ticketID}')">Assign</button>`;
+                        else if (ticket.status === "In Progress") actionBtn = `<button class="btn-danger" onclick="executeUpdate('${ticket.ticketID}', 'close')">Close</button>`;
+                        
+                        rowHTML += `<td>${actionBtn}</td></tr>`;
+                        tbody.innerHTML += rowHTML;
+                    });
+                }
+            } catch (error) { tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Datalink error.</td></tr>`; }
+        }
+
+        async function executeUpdate(ticketID, actionType) {
+            const user = JSON.parse(sessionStorage.getItem('itsd_user'));
+            const payload = { action: "update_ticket", ticketID: ticketID, updateType: actionType };
+            if (actionType === 'approve') payload.approverName = user.name; 
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); loadTickets(); } catch (e) { alert("Network Error"); }
+        }
+
+        async function openAssignModal(ticketID) {
+            document.getElementById('activeAssignTicketID').value = ticketID; document.getElementById('assignModal').style.display = 'flex';
+            const dp = document.getElementById('executorDropdown'); dp.innerHTML = '<option value="">Querying registry...</option>';
+            try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "get_executors" }) }); const data = await res.json();
+                if (data.success && data.executors.length > 0) { dp.innerHTML = '<option value="">Select Executor...</option>'; data.executors.forEach(n => dp.innerHTML += `<option value="${n}">${n}</option>`); } 
+                else { dp.innerHTML = '<option value="">No Executors available</option>'; }
+            } catch (e) { dp.innerHTML = '<option value="">Query failed</option>'; }
+        }
+
+        function closeModal() { document.getElementById('assignModal').style.display = 'none'; }
+
+        async function confirmAssignment() {
+            const ticketID = document.getElementById('activeAssignTicketID').value; const worker = document.getElementById('executorDropdown').value;
+            if (!worker) return; document.getElementById('confirmAssignBtn').disabled = true;
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "update_ticket", ticketID: ticketID, updateType: "assign", assignedTo: worker }) }); closeModal(); loadTickets(); } 
+            catch (e) { alert("Assignment Failed"); } finally { document.getElementById('confirmAssignBtn').disabled = false; }
+        }
+
+        function logout() { sessionStorage.removeItem('itsd_user'); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
