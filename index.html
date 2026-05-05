@@ -3,123 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITSD System</title>
+    <title>Hartalega ITSD System</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .container { background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+        /* Base Theme */
+        body {
+            background: #0a1628;
+            font-family: 'Inter', sans-serif;
+            color: #e8eaf0;
+            margin: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .hrt-grid-bg { 
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,190,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,190,0,0.03) 1px, transparent 1px),
+                radial-gradient(circle at center, rgba(10,22,40,0.85) 0%, rgba(10,22,40,0.65) 100%);
+            background-size: 48px 48px, 48px 48px, cover;
+            background-position: center, center, center;
+            background-repeat: repeat, repeat, no-repeat;
+            pointer-events: none; z-index: -2;
+        }
+
+        .hrt-glow {
+            position: fixed; top: -120px; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 400px;
+            background: radial-gradient(ellipse, rgba(255,190,0,0.06) 0%, transparent 70%);
+            pointer-events: none; z-index: -1;
+        }
+
+        /* Header Styling */
+        .hrt-header {
+            width: 100%; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 40px; margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255,190,0,0.15);
+            background: rgba(10,22,40,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+        }
+
+        .hrt-logo-area { display: flex; align-items: center; gap: 14px; }
+        .hrt-logo-badge {
+            width: 42px; height: 42px;
+            border: 2px solid #FFBE00; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,190,0,0.08);
+        }
+        .hrt-logo-badge svg { width: 24px; height: 24px; }
+        .hrt-logo-text { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 1px; color: #FFBE00; line-height: 1.1; }
+        .hrt-logo-sub { font-size: 10px; color: rgba(255,190,0,0.6); letter-spacing: 2px; font-weight: 400; text-transform: uppercase; }
+
+        /* Container Styling (The Dark Panels) */
+        .container { 
+            background: rgba(20, 36, 65, 0.85); 
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,190,0,0.2);
+            padding: 40px; border-radius: 12px; 
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); 
+            width: 90%; max-width: 400px; text-align: center; 
+            box-sizing: border-box;
+            margin-bottom: 40px;
+        }
         .dashboard-container { max-width: 1000px; text-align: left; }
-        h2, h3 { margin-top: 0; color: #333; }
+        
+        h2, h3 { font-family: 'Rajdhani', sans-serif; margin-top: 0; color: #e8eaf0; letter-spacing: 1px; text-transform: uppercase;}
+        h2 { font-size: 24px; } h3 { font-size: 18px; }
+
+        /* Input Styling */
         .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 5px; color: #666; font-size: 14px; font-weight: bold; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: inherit; }
-        button { width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
-        button:hover { background-color: #004494; }
-        button:disabled { background-color: #cccccc; cursor: not-allowed; }
-        .btn-danger { background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 12px;}
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-success { background-color: #28a745; width: auto; padding: 6px 12px; font-size: 12px;}
-        .btn-success:hover { background-color: #218838; }
-        .btn-primary { background-color: #007bff; width: auto; padding: 6px 12px; font-size: 12px;}
-        .btn-primary:hover { background-color: #0069d9; }
+        .input-group label { display: block; margin-bottom: 8px; color: rgba(232,234,240,0.6); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
+        .input-group input, .input-group select, .input-group textarea { 
+            width: 100%; padding: 12px; box-sizing: border-box; font-size: 16px;
+            background: rgba(10,22,40,0.6);
+            border: 1px solid rgba(255,190,0,0.3);
+            color: #FFBE00;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: #FFBE00; }
+        .input-group select option { background: #0a1628; color: #FFBE00; }
+
+        /* Buttons */
+        button { 
+            width: 100%; padding: 12px; font-size: 16px; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+            background-color: #FFBE00; color: #0a1628; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s; 
+        }
+        button:hover { background-color: #ffce33; box-shadow: 0 0 15px rgba(255,190,0,0.4); }
+        button:disabled { background-color: rgba(255,190,0,0.3); cursor: not-allowed; color: rgba(232,234,240,0.5); box-shadow: none;}
         
-        .error-message { color: #d9534f; margin-top: 15px; font-size: 14px; display: none; }
-        .toggle-link { margin-top: 20px; font-size: 14px; color: #0056b3; cursor: pointer; display: inline-block; font-weight: bold; }
-        .toggle-link:hover { text-decoration: underline; }
+        .btn-danger { background-color: rgba(239, 68, 68, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px;}
+        .btn-danger:hover { background-color: rgba(239, 68, 68, 1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .btn-success { background-color: rgba(16, 185, 129, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px;}
+        .btn-success:hover { background-color: rgba(16, 185, 129, 1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .btn-primary { background-color: rgba(59, 130, 246, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px;}
+        .btn-primary:hover { background-color: rgba(59, 130, 246, 1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        .btn-secondary { background-color: rgba(30, 50, 85, 0.8); color: white; width: auto; padding: 8px 16px; font-size: 14px; border: 1px solid rgba(255,190,0,0.2);}
+        .btn-secondary:hover { background-color: rgba(35, 60, 100, 1); border-color: #FFBE00;}
+
+        /* Utilities */
+        .error-message { color: #ef4444; margin-top: 15px; font-size: 14px; display: none; background: rgba(239,68,68,0.1); padding: 10px; border-radius: 4px; border: 1px solid rgba(239,68,68,0.3);}
+        .toggle-link { margin-top: 20px; font-size: 14px; color: #FFBE00; cursor: pointer; display: inline-block; font-weight: 500; opacity: 0.8;}
+        .toggle-link:hover { opacity: 1; text-decoration: underline; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; vertical-align: top;}
-        th { background-color: #f8f9fa; }
-        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block;}
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-approved { background: #cce5ff; color: #004085; }
-        .status-progress { background: #d1ecf1; color: #0c5460; }
-        .status-closed { background: #d4edda; color: #155724; }
-        .meta-text { font-size: 11px; color: #666; display: block; margin-top: 4px; }
+        /* Table Styling */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; font-size: 13px; border: 1px solid rgba(255,190,0,0.15); border-radius: 8px; overflow: hidden;}
+        th, td { padding: 12px 15px; border-bottom: 1px solid rgba(255,190,0,0.1); text-align: left; vertical-align: middle; }
+        th { background-color: rgba(30, 50, 85, 0.6); color: rgba(232,234,240,0.8); font-family: 'Rajdhani', sans-serif; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;}
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: rgba(255,190,0,0.03); }
+
+        /* Status Badges */
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; text-transform: uppercase; border: 1px solid transparent;}
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: #FFBE00; border-color: rgba(245, 158, 11, 0.3); }
+        .status-approved { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+        .status-progress { background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+        .status-closed { background: rgba(232, 234, 240, 0.1); color: #e8eaf0; border-color: rgba(232, 234, 240, 0.3); }
+        .meta-text { font-size: 11px; color: rgba(232,234,240,0.5); display: block; margin-top: 4px; }
 
         #registerArea, #dashboardArea { display: none; }
 
-        /* Modal Styling for Assignment */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 350px; text-align: left; }
+        /* Modal Styling */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,22,40,0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: rgba(20, 36, 65, 0.95); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: left; border: 1px solid #FFBE00; box-shadow: 0 0 30px rgba(255,190,0,0.15);}
+        .modal-content p { color: rgba(232,234,240,0.7); margin-bottom: 20px;}
     </style>
 </head>
 <body>
 
+    <div class="hrt-grid-bg"></div>
+    <div class="hrt-glow"></div>
+
+    <nav class="hrt-header">
+        <div class="hrt-logo-area">
+            <div class="hrt-logo-badge">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="14" width="6" height="14" rx="1" fill="#FFBE00"/>
+                    <rect x="13" y="8" width="6" height="20" rx="1" fill="#FFBE00"/>
+                    <rect x="22" y="4" width="6" height="24" rx="1" fill="#FFBE00" opacity="0.7"/>
+                    <path d="M4 11 L13 6 L22 2" stroke="#FFBE00" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                </svg>
+            </div>
+            <div>
+                <div class="hrt-logo-text">HARTALEGA</div>
+                <div class="hrt-logo-sub">ITSD System</div>
+            </div>
+        </div>
+    </nav>
+
     <!-- LOGIN SCREEN -->
     <div class="container" id="loginArea">
-        <h2>ITSD System Login</h2>
+        <h2>System Login</h2>
+        <p style="color: rgba(232,234,240,0.6); font-size: 14px; margin-bottom: 25px;">Please authenticate to access the portal.</p>
         <form id="loginForm">
-            <div class="input-group"><label>User ID</label><input type="text" id="loginUserID" required></div>
+            <div class="input-group"><label>Employee ID</label><input type="text" id="loginUserID" required></div>
             <div class="input-group"><label>Password</label><input type="password" id="loginPassword" required></div>
-            <button type="submit" id="loginBtn" style="width:100%; padding:12px; font-size:16px;">Log In</button>
+            <button type="submit" id="loginBtn">Initialize Access</button>
             <div id="loginError" class="error-message"></div>
         </form>
-        <span class="toggle-link" id="showRegisterLink">Don't have an account? Register here.</span>
+        <span class="toggle-link" id="showRegisterLink">New User? Request Access Here.</span>
     </div>
 
     <!-- REGISTER SCREEN -->
     <div class="container" id="registerArea">
         <h2>Register Account</h2>
         <form id="registerForm">
-            <div class="input-group"><label>User ID</label><input type="text" id="regUserID" required></div>
+            <div class="input-group"><label>Employee ID</label><input type="text" id="regUserID" required></div>
             <div class="input-group"><label>Full Name</label><input type="text" id="regName" required></div>
-            <div class="input-group"><label>Email</label><input type="email" id="regEmail" required></div>
+            <div class="input-group"><label>Email Address</label><input type="email" id="regEmail" required></div>
             <div class="input-group"><label>Password</label><input type="password" id="regPassword" required></div>
-            <button type="submit" id="registerBtn" style="width:100%; padding:12px; font-size:16px;">Register</button>
+            <button type="submit" id="registerBtn">Submit Registration</button>
             <div id="registerError" class="error-message"></div>
         </form>
-        <span class="toggle-link" id="showLoginLink">Already have an account? Log in.</span>
+        <span class="toggle-link" id="showLoginLink">Return to Login</span>
     </div>
 
     <!-- DASHBOARD SCREEN -->
     <div class="container dashboard-container" id="dashboardArea">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,190,0,0.15); padding-bottom: 15px; margin-bottom: 30px;">
             <div>
-                <h2 id="welcomeMessage" style="margin: 0;">Welcome!</h2>
-                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Role: <strong id="userRoleDisplay"></strong></p>
+                <h2 id="welcomeMessage" style="margin: 0; color: #FFBE00;">Welcome!</h2>
+                <p style="margin: 5px 0 0 0; color: rgba(232,234,240,0.6); font-size: 14px; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; text-transform: uppercase;">
+                    System Role: <strong id="userRoleDisplay" style="color: #e8eaf0;"></strong>
+                </p>
             </div>
-            <button id="logoutBtn" class="btn-danger">Log Out</button>
+            <button id="logoutBtn" class="btn-secondary" style="width: auto;">Terminate Session</button>
         </div>
 
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 30px;">
-            <h3>Raise a New Request</h3>
+        <div style="background: rgba(30, 50, 85, 0.4); padding: 25px; border-radius: 8px; border: 1px solid rgba(255,190,0,0.15); margin-bottom: 40px;">
+            <h3 style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FFBE00; box-shadow: 0 0 8px #FFBE00;"></span>
+                Raise a New Request
+            </h3>
             <form id="requestForm">
                 <div class="input-group">
-                    <label>Request Type</label>
+                    <label>Request Classification</label>
                     <select id="reqType" required>
-                        <option value="">Select a type...</option>
-                        <option value="New Project">New Project</option>
-                        <option value="Change to Existing System">Change to Existing System</option>
+                        <option value="">Select classification...</option>
+                        <option value="New Project">New Project Initiative</option>
+                        <option value="Change to Existing System">System Modification</option>
                     </select>
                 </div>
                 <div class="input-group">
-                    <label>Description</label>
-                    <textarea id="reqDesc" required rows="2" placeholder="Briefly describe the requirements..."></textarea>
+                    <label>Requirement Details</label>
+                    <textarea id="reqDesc" required rows="3" placeholder="Define the scope and requirements..."></textarea>
                 </div>
-                <button type="submit" id="submitReqBtn" class="btn-success" style="font-size: 14px;">Submit Request</button>
-                <div id="reqMessage" style="margin-top: 10px; font-size: 14px; font-weight: bold; display: none;"></div>
+                <button type="submit" id="submitReqBtn" class="btn-success">Submit Ticket</button>
+                <div id="reqMessage" style="margin-top: 15px; font-size: 14px; font-weight: bold; display: none; padding: 10px; border-radius: 4px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"></div>
             </form>
         </div>
 
         <div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 id="tableTitle">My Requests</h3>
-                <button id="refreshDataBtn" class="btn-primary" style="background-color: #6c757d;">Refresh Data</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 id="tableTitle" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span>
+                    My Requests
+                </h3>
+                <button id="refreshDataBtn" class="btn-secondary">Sync Data</button>
             </div>
             <div style="overflow-x:auto;">
                 <table>
                     <thead>
                         <tr id="tableHeaderRow">
-                            <th width="10%">ID</th>
-                            <th width="15%">Type</th>
+                            <th width="10%">Ticket ID</th>
+                            <th width="15%">Classification</th>
                             <th width="30%">Description</th>
                             <th width="15%">Status</th>
-                            <th width="15%">Lifecycle Details</th>
+                            <th width="15%">Lifecycle Trace</th>
                             <!-- Actions column injected dynamically if Admin or Executor -->
                         </tr>
                     </thead>
                     <tbody id="ticketTableBody">
-                        <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: rgba(232,234,240,0.5);">Initializing datalink...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -129,21 +255,21 @@
     <!-- ASSIGN WORKER MODAL -->
     <div id="assignModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>Assign Worker</h3>
-            <p style="font-size: 13px; color: #666; margin-top: 0;">Select an Executor to assign to this ticket.</p>
+            <h3>Assign Executor</h3>
+            <p style="font-size: 13px;">Select an authorized Executor to assign to this ticket lifecycle.</p>
             
             <div class="input-group">
-                <label>Select Executor:</label>
+                <label>Available Personnel:</label>
                 <select id="executorDropdown" required>
-                    <option value="">Fetching list...</option>
+                    <option value="">Fetching registry...</option>
                 </select>
             </div>
             
             <input type="hidden" id="activeAssignTicketID">
             
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-success" id="confirmAssignBtn" style="flex: 1;" onclick="confirmAssignment()">Confirm Assignment</button>
-                <button class="btn-danger" style="flex: 1;" onclick="closeModal()">Cancel</button>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn-success" id="confirmAssignBtn" style="flex: 1;" onclick="confirmAssignment()">Confirm</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="closeModal()">Abort</button>
             </div>
         </div>
     </div>
@@ -172,48 +298,46 @@
             const payload = { action: "login", userID: document.getElementById('loginUserID').value, password: document.getElementById('loginPassword').value };
             try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); const result = await res.json();
                 if (result.success) setupDashboard(result.user); else { err.innerText = result.message; err.style.display = "block"; }
-            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Log In"; }
+            } catch (error) { err.innerText = "Network link failure."; err.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Initialize Access"; }
         });
 
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault(); const btn = document.getElementById('registerBtn'); const err = document.getElementById('registerError');
-            btn.disabled = true; btn.innerText = "Registering..."; err.style.display = "none";
+            btn.disabled = true; btn.innerText = "Processing..."; err.style.display = "none";
             const payload = { action: "register", userID: document.getElementById('regUserID').value, name: document.getElementById('regName').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPassword').value };
             try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); const result = await res.json();
                 if (result.success) { document.getElementById('registerForm').reset(); setupDashboard(result.user); } else { err.innerText = result.message; err.style.display = "block"; }
-            } catch (error) { err.innerText = "Network error."; err.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Register"; }
+            } catch (error) { err.innerText = "Network link failure."; err.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Submit Registration"; }
         });
 
         document.getElementById('requestForm').addEventListener('submit', async function(e) {
             e.preventDefault(); const btn = document.getElementById('submitReqBtn'); const msg = document.getElementById('reqMessage');
-            btn.disabled = true; btn.innerText = "Submitting..."; msg.style.display = "none";
+            btn.disabled = true; btn.innerText = "Transmitting..."; msg.style.display = "none";
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
             const payload = { action: "new_request", submitterID: user.userID, type: document.getElementById('reqType').value, description: document.getElementById('reqDesc').value };
             try { const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); const result = await res.json();
-                if (result.success) { msg.innerText = "Ticket created!"; msg.style.color = "#155724"; msg.style.display = "block"; document.getElementById('requestForm').reset(); loadTickets(); } 
-                else { msg.innerText = "Error submitting request."; msg.style.color = "#d9534f"; msg.style.display = "block"; }
-            } catch (error) { msg.innerText = "Network error."; msg.style.color = "#d9534f"; msg.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Submit Request"; }
+                if (result.success) { msg.innerText = "Ticket initialized: " + result.ticketID; msg.style.color = "#34d399"; msg.style.display = "block"; document.getElementById('requestForm').reset(); loadTickets(); } 
+                else { msg.innerText = "Transmission failed."; msg.style.color = "#ef4444"; msg.style.background = "rgba(239,68,68,0.1)"; msg.style.display = "block"; }
+            } catch (error) { msg.innerText = "Network link failure."; msg.style.color = "#ef4444"; msg.style.background = "rgba(239,68,68,0.1)"; msg.style.display = "block"; } finally { btn.disabled = false; btn.innerText = "Submit Ticket"; }
         });
 
         // --- Load & Render Tickets ---
         async function loadTickets() {
             const tbody = document.getElementById('ticketTableBody');
             const headerRow = document.getElementById('tableHeaderRow');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Fetching data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: rgba(232,234,240,0.5);">Syncing database...</td></tr>';
             
             const user = JSON.parse(sessionStorage.getItem('itsd_user'));
             if (!user) return; 
 
             const canManage = (user.role === 'Admin' || user.role === 'Executor');
 
-            // Dynamic Table Header Title
-            if (user.role === 'Admin') document.getElementById('tableTitle').innerText = "All Requests (Admin View)";
-            else if (user.role === 'Executor') document.getElementById('tableTitle').innerText = "All Requests (Executor View)";
-            else document.getElementById('tableTitle').innerText = "My Requests";
+            if (user.role === 'Admin') document.getElementById('tableTitle').innerHTML = '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FFBE00; box-shadow: 0 0 8px #FFBE00;"></span> Registry (Admin View)';
+            else if (user.role === 'Executor') document.getElementById('tableTitle').innerHTML = '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span> Task Pool (Executor View)';
+            else document.getElementById('tableTitle').innerHTML = '<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span> My Requests';
 
-            // Add Actions Column Header if they have permission
             if (canManage && headerRow.cells.length === 5) {
-                const th = document.createElement('th'); th.width = "15%"; th.innerText = "Actions"; headerRow.appendChild(th);
+                const th = document.createElement('th'); th.width = "15%"; th.innerText = "System Actions"; headerRow.appendChild(th);
             }
 
             const payload = { action: "get_tickets", userID: user.userID, role: user.role };
@@ -224,7 +348,7 @@
                 
                 if (result.success) {
                     tbody.innerHTML = '';
-                    if (result.tickets.length === 0) { tbody.innerHTML = `<tr><td colspan="${canManage ? '6' : '5'}" style="text-align: center;">No requests found.</td></tr>`; return; }
+                    if (result.tickets.length === 0) { tbody.innerHTML = `<tr><td colspan="${canManage ? '6' : '5'}" style="text-align: center; color: rgba(232,234,240,0.5);">No records found.</td></tr>`; return; }
                     
                     result.tickets.reverse().forEach(ticket => {
                         let badgeClass = "status-pending";
@@ -233,30 +357,28 @@
                         if(ticket.status === "Closed") badgeClass = "status-closed";
 
                         let metaInfo = "";
-                        if (ticket.approverName) metaInfo += `<span class="meta-text">Approved by: ${ticket.approverName}</span>`;
-                        if (ticket.assignedTo) metaInfo += `<span class="meta-text">Assigned to: ${ticket.assignedTo} (${ticket.dateAssigned})</span>`;
-                        if (ticket.dateCompleted) metaInfo += `<span class="meta-text">Closed on: ${ticket.dateCompleted}</span>`;
+                        if (ticket.approverName) metaInfo += `<span class="meta-text">AUTH: ${ticket.approverName}</span>`;
+                        if (ticket.assignedTo) metaInfo += `<span class="meta-text">EXEC: ${ticket.assignedTo} [${ticket.dateAssigned}]</span>`;
+                        if (ticket.dateCompleted) metaInfo += `<span class="meta-text">TERM: ${ticket.dateCompleted}</span>`;
 
                         let rowHTML = `<tr>
-                            <td><strong>${ticket.ticketID}</strong></td>
-                            <td>${ticket.type}</td>
+                            <td><strong style="color: #FFBE00; font-family: 'Rajdhani'; letter-spacing: 1px;">${ticket.ticketID}</strong></td>
+                            <td style="font-size: 12px; text-transform: uppercase;">${ticket.type}</td>
                             <td>${ticket.description}</td>
                             <td><span class="status-badge ${badgeClass}">${ticket.status}</span></td>
-                            <td>${metaInfo || '<span class="meta-text">No data yet</span>'}</td>
+                            <td>${metaInfo || '<span class="meta-text">Awaiting Data</span>'}</td>
                         `;
 
-                        // Action Buttons Logic
                         if (canManage) {
                             let actionBtn = "";
                             if (ticket.status === "Pending Approval" && user.role === 'Admin') {
                                 actionBtn = `<button class="btn-success" onclick="executeSimpleUpdate('${ticket.ticketID}', 'approve')">Approve</button>`;
                             } else if (ticket.status === "Approved" && user.role === 'Admin') {
-                                actionBtn = `<button class="btn-primary" onclick="openAssignModal('${ticket.ticketID}')">Assign Worker</button>`;
+                                actionBtn = `<button class="btn-primary" onclick="openAssignModal('${ticket.ticketID}')">Assign</button>`;
                             } else if (ticket.status === "In Progress") {
-                                // Both Admin and Executor can close
-                                actionBtn = `<button class="btn-danger" onclick="executeSimpleUpdate('${ticket.ticketID}', 'close')">Close Ticket</button>`;
+                                actionBtn = `<button class="btn-danger" onclick="executeSimpleUpdate('${ticket.ticketID}', 'close')">Close</button>`;
                             } else {
-                                actionBtn = `<span class="meta-text">No Action Needed</span>`;
+                                actionBtn = `<span class="meta-text">LOCKED</span>`;
                             }
                             rowHTML += `<td>${actionBtn}</td>`;
                         }
@@ -265,7 +387,7 @@
                         tbody.innerHTML += rowHTML;
                     });
                 }
-            } catch (error) { tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Error loading tickets.</td></tr>`; }
+            } catch (error) { tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Datalink error.</td></tr>`; }
         }
 
         // --- Ticket Actions (Approve / Close) ---
@@ -278,8 +400,8 @@
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
                 if (result.success) loadTickets(); 
-                else alert("Failed to update ticket: " + result.message);
-            } catch (error) { alert("Network error."); }
+                else alert("System update failed: " + result.message);
+            } catch (error) { alert("Network link failure."); }
         }
 
         // --- Assignment Modal Logic ---
@@ -288,26 +410,19 @@
             document.getElementById('assignModal').style.display = 'flex';
             
             const dropdown = document.getElementById('executorDropdown');
-            dropdown.innerHTML = '<option value="">Fetching list...</option>';
+            dropdown.innerHTML = '<option value="">Querying registry...</option>';
             document.getElementById('confirmAssignBtn').disabled = true;
 
-            // Fetch list of Executors
             try {
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "get_executors" }) });
                 const result = await res.json();
                 
                 if (result.success && result.executors.length > 0) {
-                    dropdown.innerHTML = '<option value="">Select someone...</option>';
-                    result.executors.forEach(name => {
-                        dropdown.innerHTML += `<option value="${name}">${name}</option>`;
-                    });
+                    dropdown.innerHTML = '<option value="">Select Executor...</option>';
+                    result.executors.forEach(name => { dropdown.innerHTML += `<option value="${name}">${name}</option>`; });
                     document.getElementById('confirmAssignBtn').disabled = false;
-                } else {
-                    dropdown.innerHTML = '<option value="">No Executors found</option>';
-                }
-            } catch (error) {
-                dropdown.innerHTML = '<option value="">Error loading list</option>';
-            }
+                } else { dropdown.innerHTML = '<option value="">No Executors available</option>'; }
+            } catch (error) { dropdown.innerHTML = '<option value="">Registry query failed</option>'; }
         }
 
         function closeModal() {
@@ -319,32 +434,25 @@
             const ticketID = document.getElementById('activeAssignTicketID').value;
             const workerName = document.getElementById('executorDropdown').value;
             
-            if (!workerName) { alert("Please select an Executor."); return; }
+            if (!workerName) { alert("Executor selection required."); return; }
             
             const btn = document.getElementById('confirmAssignBtn');
-            btn.innerText = "Assigning..."; btn.disabled = true;
+            btn.innerText = "Processing..."; btn.disabled = true;
 
             const payload = { action: "update_ticket", ticketID: ticketID, updateType: "assign", assignedTo: workerName };
 
             try {
                 const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
-                if (result.success) {
-                    closeModal();
-                    loadTickets(); 
-                } else {
-                    alert("Failed to assign ticket.");
-                }
-            } catch (error) { alert("Network error."); }
-            finally {
-                btn.innerText = "Confirm Assignment"; btn.disabled = false;
-            }
+                if (result.success) { closeModal(); loadTickets(); } else { alert("Assignment failed."); }
+            } catch (error) { alert("Network link failure."); }
+            finally { btn.innerText = "Confirm"; btn.disabled = false; }
         }
 
         // --- Setup ---
         function setupDashboard(user) {
             toggleView('dashboard');
-            document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name + "!";
+            document.getElementById('welcomeMessage').innerText = "Welcome, " + user.name;
             document.getElementById('userRoleDisplay').innerText = user.role;
             sessionStorage.setItem('itsd_user', JSON.stringify(user));
             loadTickets(); 
